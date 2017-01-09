@@ -54,7 +54,7 @@ from supervisor import childutils
 
 
 class SuperSlacker(ProcessStateMonitor):
-    process_state_events = ['PROCESS_STATE_FATAL']
+    process_state_events = ['PROCESS_STATE_FATAL', 'PROCESS_STATE_EXITED', 'PROCESS_STATE_STOPPED', 'PROCESS_STATE_RUNNING']
 
     @classmethod
     def _get_opt_parser(cls):
@@ -118,9 +118,10 @@ class SuperSlacker(ProcessStateMonitor):
         self.attachment = kwargs.get('attachment', None)
 
     def get_process_state_change_msg(self, headers, payload):
+        state = headers.get('eventname', 'none').split("_")[-1]
         pheaders, pdata = childutils.eventdata(payload + '\n')
-        txt = ("[{0}] Process {groupname}:{processname} "
-               "failed to start too many times".format(self.hostname, **pheaders))
+        txt = ("[{0}] \nprocess:  {processname} \ncurrent state: {1} "
+               "\ntransitioned from: {from_state}".format(self.hostname, state, **pheaders))
         return txt
 
     def send_batch_notification(self):
@@ -142,8 +143,6 @@ class SuperSlacker(ProcessStateMonitor):
             payload = {
                 'channel': message['channel'],
                 'text': msg,
-                'username': 'superslacker',
-                'icon_emoji': ':sos:',
                 'link_names': 1,
                 'attachments': [{"text": message['attachment'], "color": "danger"}]
             }
