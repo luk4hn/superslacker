@@ -28,7 +28,7 @@
 # events=PROCESS_STATE,TICK_60
 
 """
-Usage: superslacker [-t token] [-c channel] [-n hostname] [-w webhook] [-a attachment]
+Usage: superslacker [-t token] [-c channel] [-n hostname] [-w webhook]
 
 Options:
   -h, --help            show this help message and exit
@@ -38,8 +38,6 @@ Options:
                         Slack Channel
   -w WEBHOOK, --webhook=WEBHOOK
                         Slack WebHook URL
-  -a ATTACHMENT, --attachment=ATTACHMENT
-                        Slack Attachment text
   -n HOSTNAME, --hostname=HOSTNAME
                         System Hostname
 """
@@ -64,7 +62,6 @@ class SuperSlacker(ProcessStateMonitor):
         parser.add_option("-t", "--token", help="Slack Token")
         parser.add_option("-c", "--channel", help="Slack Channel")
         parser.add_option("-w", "--webhook", help="Slack WebHook URL")
-        parser.add_option("-a", "--attachment", help="Slack Attachment text")
         parser.add_option("-n", "--hostname", help="System Hostname")
 
         return parser
@@ -115,7 +112,6 @@ class SuperSlacker(ProcessStateMonitor):
         self.now = kwargs.get('now', None)
         self.hostname = kwargs.get('hostname', None)
         self.webhook = kwargs.get('webhook', None)
-        self.attachment = kwargs.get('attachment', None)
 
     def get_process_state_change_msg(self, headers, payload):
         state = headers.get('eventname', 'none').split("_")[-1]
@@ -134,7 +130,6 @@ class SuperSlacker(ProcessStateMonitor):
             'token': self.token,
             'webhook': self.webhook,
             'channel': self.channel,
-            'attachment': self.attachment,
             'messages': self.batchmsgs
         }
 
@@ -142,9 +137,8 @@ class SuperSlacker(ProcessStateMonitor):
         for msg in message['messages']:
             payload = {
                 'channel': message['channel'],
-                'text': msg,
                 'link_names': 1,
-                'attachments': [{"text": message['attachment'], "color": "danger"}]
+                'attachments': [{"text": msg, "color": "#ff8800"}]
             }
             if message['webhook']:
                 webhook = IncomingWebhook(url=message['webhook'])
