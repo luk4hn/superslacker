@@ -116,7 +116,7 @@ class SuperSlacker(ProcessStateMonitor):
     def get_process_state_change_msg(self, headers, payload):
         state = headers.get('eventname', 'none').split("_")[-1]
         pheaders, pdata = childutils.eventdata(payload + '\n')
-        txt = ("_{0}_ \nprocess:  {groupname}:{processname} \ncurrent state: {1} "
+        txt = ("[{0}] \nprocess:  {groupname}:{processname} \ncurrent state: {1} "
                "\n(transitioned from: {from_state})".format(self.hostname, state, **pheaders))
         return txt
 
@@ -135,10 +135,13 @@ class SuperSlacker(ProcessStateMonitor):
 
     def send_message(self, message):
         for msg in message['messages']:
+            color = "#ff8800"
+            if "state: RUNNING" in msg:
+                color = "#00ff00"
             payload = {
                 'channel': message['channel'],
                 'link_names': 1,
-                'attachments': [{"text": msg, "color": "#ff8800"}]
+                'attachments': [{"text": msg, "color": color}]
             }
             if message['webhook']:
                 webhook = IncomingWebhook(url=message['webhook'])
