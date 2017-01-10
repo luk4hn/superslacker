@@ -116,8 +116,8 @@ class SuperSlacker(ProcessStateMonitor):
     def get_process_state_change_msg(self, headers, payload):
         state = headers.get('eventname', 'none').split("_")[-1]
         pheaders, pdata = childutils.eventdata(payload + '\n')
-        txt = ("[{0}] \nprocess:  {processname} \ncurrent state: {1} "
-               "\ntransitioned from: {from_state}".format(self.hostname, state, **pheaders))
+        txt = ("_{0}_ \nprocess:  {groupname}:{processname} \ncurrent state: {1} "
+               "\n(transitioned from: {from_state})".format(self.hostname, state, **pheaders))
         return txt
 
     def send_batch_notification(self):
